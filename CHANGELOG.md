@@ -5,6 +5,11 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com),
 and entries are generated from [Conventional Commits](https://www.conventionalcommits.org).
 
+## [0.3.0] - 2026-07-11
+
+### Other Changes
+- Add release, changelog, pre-commit, CI, and Dependabot machinery (#9)
+
 ## [0.2.0] - 2026-07-11
 
 ### Other Changes
