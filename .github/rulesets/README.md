@@ -21,10 +21,10 @@ policy is reviewable and reproducible.
 
 ```bash
 # Create (first time)
-gh api --method POST repos/Jebel-Quant/rhiza-config/rulesets \
+gh api --method POST repos/Jebel-Quant/rhiza-claude/rulesets \
   --input .github/rulesets/main-protection.json
 
 # Update an existing ruleset (replace <id> from `gh api .../rulesets`)
-gh api --method PUT repos/Jebel-Quant/rhiza-config/rulesets/<id> \
+gh api --method PUT repos/Jebel-Quant/rhiza-claude/rulesets/<id> \
   --input .github/rulesets/main-protection.json
 ```

@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Please report suspected vulnerabilities privately via GitHub's
-[security advisories](https://github.com/Jebel-Quant/rhiza-config/security/advisories/new)
+[security advisories](https://github.com/Jebel-Quant/rhiza-claude/security/advisories/new)
 rather than opening a public issue.
 
 We aim to acknowledge reports within a few business days and will keep you
