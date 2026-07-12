@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Read-only statistics dashboard for a rhiza-managed repo — no agent, no tokens.
 
-A deterministic Python port of the `/rhiza:stats` slash command. It gathers the
-same numbers (LOC, tests, coverage, complexity, deps, git activity, rhiza
-template status), prints a terminal dashboard, and writes a self-contained
-`docs/stats.html` you can wire into `mkdocs.yml`.
+This is the implementation behind the `/rhiza:stats` slash command, which is a
+thin wrapper that just runs this script and relays its output. It can also be run
+directly — no agent, no tokens. It gathers the numbers (LOC, tests, coverage,
+complexity, deps, git activity, rhiza template status), prints a terminal
+dashboard, and writes a self-contained `docs/stats.html` you can wire into
+`mkdocs.yml`.
 
 Usage:
   python3 scripts/stats.py [PATH] [--slow] [--no-html] [--html-out docs/stats.html]
@@ -14,7 +16,7 @@ Usage:
   --no-html   skip writing the HTML artifact (terminal only)
   --html-out  where to write the HTML (default: docs/stats.html under the repo root)
 
-Design mirrors the command: it counts and measures, it does NOT score, fix, or
+By design it counts and measures, it does NOT score, fix, or
 file anything (that's `/quality`'s job). The lone artifact it writes is the HTML
 dashboard. Missing tools degrade to "n/a (<reason>)" rather than failing the run.
 Tracked files (`git ls-files`) are the file list — never `find .` — so
