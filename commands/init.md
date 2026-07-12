@@ -1,5 +1,5 @@
 ---
-description: Bootstrap a rhiza-managed repo in the current folder (empty, or an existing git repo that isn't yet rhiza-managed) — git init if needed, ask whether it lives on GitHub or GitLab (auto-detecting an existing remote), ask owner/name/visibility, optionally scaffold a minimal Python project (pyproject.toml + src/ + tests/), then put the .rhiza scaffold and the first template sync on a `rhiza_init_<date>` branch and open a PR. Never pushes rhiza changes straight to the default branch.
+description: Bootstrap a rhiza-managed repo in the current folder (empty, or an existing git repo that isn't yet rhiza-managed) — git init if needed, ask whether it lives on GitHub or GitLab (auto-detecting an existing remote), ask owner/name/visibility, pick language (python/go) and template repo (default jebel-quant/rhiza or rhiza-go, with a reachability check), optionally scaffold the language skeleton + mkdocs.yml, validate the config, then put the .rhiza scaffold and the first template sync on a `rhiza_init_<date>` branch and open a PR. Never pushes rhiza changes straight to the default branch.
 argument-hint: "[repo name]  (optional; defaults to the current folder name)"
 allowed-tools: Bash(git*), Bash(gh*), Bash(glab*), Bash(uvx*), Bash(make*), Bash(python3*), Bash(cat*), Bash(ls*), Bash(basename*), Bash(pwd*), Bash(date*), Read, Write, AskUserQuestion
 ---
@@ -100,14 +100,29 @@ Gather via `AskUserQuestion` (offer sensible defaults, let the user override):
 Hold these as `OWNER`, `NAME`, `VISIBILITY` for the remaining steps. The full
 slug is `OWNER/NAME`.
 
-## 5. Resolve the template version
-- Template content version: latest `jebel-quant/rhiza` release —
-  `gh release list -R jebel-quant/rhiza -L 1 --json tagName --jq '.[0].tagName'`
-  (this read works even for a GitLab-hosted target; it's just querying the public
-  rhiza repo). If `gh` is unavailable, ask the user for the tag (e.g. `v1.1.3`).
-- Tool version: pin `0.18.0` (the version the fleet currently runs). This is the
-  **rhiza CLI** version and is decoupled from the template content version above —
-  do not derive one from the other.
+## 5. Choose the template source and version
+Runs on **both** paths (a repo can be Go even when it already has a remote).
+
+- **Language.** Ask (`AskUserQuestion`, default **python**): `python` or `go`. It
+  selects the default template repo and the scaffolding shape in step 9.
+- **Template repository** — hold as `TEMPLATE_REPO`:
+  - default by language: `jebel-quant/rhiza` (python), `jebel-quant/rhiza-go` (go);
+  - offer to override with a custom `owner/repo`, or to pick from the
+    rhiza-tagged repos (the same set `/rhiza:repos` lists —
+    `gh search repos --topic rhiza --json fullName`). Keep the default unless the
+    user chooses otherwise.
+- **Reachability check.** Before writing anything, confirm the chosen repo exists
+  and is readable: `git ls-remote --exit-code https://<host>/$TEMPLATE_REPO`
+  (host = `github.com` or `gitlab.com` per the platform). If it's unreachable,
+  stop and report — don't scaffold a `template.yml` that points at a repo that
+  isn't there. (If `git` can't check, warn and continue rather than hard-fail.)
+- **Template content version** — hold as `TARGET`: latest release of
+  `$TEMPLATE_REPO`, `gh release list -R "$TEMPLATE_REPO" -L 1 --json tagName --jq '.[0].tagName'`
+  (falls back to `git ls-remote --tags` for a GitLab-hosted template repo). If
+  neither works, ask the user for the tag (e.g. `v1.1.3`).
+- **Tool version:** pin `0.18.0` (the version the fleet currently runs). This is
+  the **rhiza CLI** version and is decoupled from `TARGET` above — do not derive
+  one from the other.
 
 ## 6. Establish the remote and the default branch
 Every rhiza change goes on a branch (step 7) and out as a PR (step 10), so first
@@ -144,14 +159,17 @@ Determine the default branch name `DEFAULT` (existing repo:
 ## 8. Scaffold `.rhiza/` and commit (on the branch)
 Write two files (create the `.rhiza/` directory first):
 
-`.rhiza/template.yml`:
+`.rhiza/template.yml` (use `TEMPLATE_REPO` and `TARGET` from step 5):
 ```yaml
-template-repository: "jebel-quant/rhiza"
-template-branch: "<TARGET tag from step 5>"
+template-repository: "<TEMPLATE_REPO>"   # e.g. jebel-quant/rhiza or jebel-quant/rhiza-go
+template-branch: "<TARGET>"
 
 profiles:
   - <github-project | gitlab-project>   # per step 3
 ```
+Use the `github-project` / `gitlab-project` profile matching the platform. If a
+non-default `TEMPLATE_REPO` defines its own profile names, use that repo's
+convention instead of assuming these two.
 
 `.rhiza/.rhiza-version`:
 ```
@@ -193,12 +211,15 @@ empty repo, none if the repo already has them. Create **only what's missing**;
 never overwrite an existing file (skip it and say so). Let `PKG` be `NAME`
 lowercased with non-identifier characters (e.g. `-`) turned into `_`.
 
-- **Python package skeleton** — `pyproject.toml` + `src/$PKG/` + `tests/`:
-  - `pyproject.toml` with a minimal `[project]` (`name = "$NAME"`,
-    `version = "0.0.0"`, `requires-python`, empty `dependencies`) and a
-    `[build-system]`, if absent.
-  - `src/$PKG/__init__.py` (a one-line docstring), if `src/` has no package yet.
-  - `tests/test_smoke.py` with a single trivial passing test, if `tests/` is empty.
+- **Language skeleton** — matches the language chosen in step 5:
+  - **python:** `pyproject.toml` (minimal `[project]`: `name = "$NAME"`,
+    `version = "0.0.0"`, `requires-python`, empty `dependencies`, plus a
+    `[build-system]`) if absent; `src/$PKG/__init__.py` (one-line docstring) if
+    `src/` has no package yet; `tests/test_smoke.py` with a single trivial passing
+    test if `tests/` is empty.
+  - **go:** don't write a package for the user — mirror `rhiza-go`'s own flow and
+    just tell them to run `go mod init <module>` (e.g. `<host>/$OWNER/$NAME`). Skip
+    the pyproject/src/tests items.
 - **`mkdocs.yml`** — a minimal config (`site_name: $NAME`, `theme: material`,
   `docs_dir: docs`, a Home → `index.md` nav entry) plus a placeholder
   `docs/index.md`, if `mkdocs.yml` is absent. Tell the user this is a bare
@@ -209,6 +230,16 @@ lowercased with non-identifier characters (e.g. `-`) turned into `_`.
 If anything was created, commit it separately on the branch:
 `git commit -m "chore: scaffold minimal project layout"`. If the user picked
 nothing (or everything already existed), skip this commit silently.
+
+### Validate the configuration
+Before pushing, confirm the `.rhiza/template.yml` you wrote is valid — this is
+what `rhiza-cli`'s own `init` does at the end, so don't skip it:
+```bash
+uvx "rhiza==0.18.0" validate .
+```
+(Or the plugin's stdlib validator `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/validate.py"`
+if `uvx` is unavailable.) If validation fails, stop and show the errors rather
+than opening a PR on a broken config.
 
 ## 10. Push the branch and open the PR
 - `git push -u origin "$BRANCH"`.
