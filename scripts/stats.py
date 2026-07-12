@@ -44,12 +44,6 @@ except ModuleNotFoundError:  # pragma: no cover - older interpreters
     except ModuleNotFoundError:
         tomllib = None  # type: ignore
 
-TEXT_EXT_HINT = {
-    "py", "pyi", "md", "rst", "txt", "toml", "cfg", "ini", "yaml", "yml", "json",
-    "js", "ts", "tsx", "jsx", "css", "html", "sh", "bash", "zsh", "make", "mk",
-    "c", "h", "cpp", "hpp", "rs", "go", "java", "rb", "sql", "xml", "csv",
-}
-MARKER_RE = re.compile(r"TODO|FIXME|XXX|HACK")
 SLOW = False
 
 
@@ -213,8 +207,15 @@ def section_identity(root: Path, scope: str | None) -> tuple[Section, dict]:
 
     # host social stats
     if ctx.get("platform") == "GitHub":
-        raw = out(["gh", "repo", "view", "--json",
-                   "stargazerCount,forkCount,isArchived,createdAt,pushedAt,diskUsage"])
+        raw = out(
+            [
+                "gh",
+                "repo",
+                "view",
+                "--json",
+                "stargazerCount,forkCount,isArchived,createdAt,pushedAt,diskUsage",
+            ]
+        )
         if raw:
             try:
                 d = json.loads(raw)
@@ -348,8 +349,12 @@ def language_split(scope: str | None) -> dict | None:
             try:
                 data = json.loads(raw)
                 tot = data.get("Total", {})
-                return {"tool": "tokei", "code": tot.get("code", 0),
-                        "comment": tot.get("comments", 0), "blank": tot.get("blanks", 0)}
+                return {
+                    "tool": "tokei",
+                    "code": tot.get("code", 0),
+                    "comment": tot.get("comments", 0),
+                    "blank": tot.get("blanks", 0),
+                }
             except ValueError:
                 return None
     return None
@@ -452,8 +457,11 @@ def section_deps(root: Path) -> Section:
     else:
         reqs = list(root.glob("requirements*.txt"))
         if reqs:
-            n = sum(1 for line in reqs[0].read_text(errors="ignore").splitlines()
-                    if line.strip() and not line.startswith("#"))
+            n = sum(
+                1
+                for line in reqs[0].read_text(errors="ignore").splitlines()
+                if line.strip() and not line.startswith("#")
+            )
             s.row("Pinned packages", f"{n} ({reqs[0].name})")
 
     if SLOW:
@@ -501,8 +509,9 @@ def section_git(ctx: dict) -> tuple[Section, dict]:
         s.row("Last commit", last)
 
     db = ctx.get("default_branch", "main")
-    ahead = (out(["git", "rev-list", "--count", f"origin/{db}..HEAD"])
-             or out(["git", "rev-list", "--count", f"{db}..HEAD"]))
+    ahead = out(["git", "rev-list", "--count", f"origin/{db}..HEAD"]) or out(
+        ["git", "rev-list", "--count", f"{db}..HEAD"]
+    )
     if ahead is not None:
         s.row(f"Ahead of {db}", ahead)
 
@@ -526,8 +535,9 @@ def section_git(ctx: dict) -> tuple[Section, dict]:
         prs = out(["gh", "pr", "list", "--state", "open", "--json", "number", "--jq", "length"])
         gc["open_prs"] = prs
         s.row("Open PRs", prs if prs is not None else na("gh unavailable"))
-        run_info = out(["gh", "run", "list", "-L", "1", "--json", "conclusion,name",
-                        "--jq", ".[0].conclusion"])
+        run_info = out(
+            ["gh", "run", "list", "-L", "1", "--json", "conclusion,name", "--jq", ".[0].conclusion"]
+        )
         s.row("Latest CI", run_info if run_info else na("gh unavailable"))
         if ctx.get("slug"):
             oic = out(["gh", "api", f"repos/{ctx['slug']}", "--jq", ".open_issues_count"])
@@ -551,9 +561,14 @@ def section_git(ctx: dict) -> tuple[Section, dict]:
     gc["branches"] = remote_branches.strip() if remote_branches else None
     s.row("Remote branches", gc["branches"] or na("unknown"))
 
-    churn = out(["bash", "-c",
-                 "git log --since=90.days --name-only --pretty=format: | sort | uniq -c "
-                 "| sort -rn | grep -v '^ *[0-9]* *$' | head"])
+    churn = out(
+        [
+            "bash",
+            "-c",
+            "git log --since=90.days --name-only --pretty=format: | sort | uniq -c "
+            "| sort -rn | grep -v '^ *[0-9]* *$' | head",
+        ]
+    )
     if churn:
         rows = []
         for ln in churn.splitlines()[:8]:
@@ -588,8 +603,21 @@ def section_rhiza(root: Path) -> tuple[Section, dict]:
         tool_ver = na("no .rhiza-version")
     s.row("Rhiza tool version", f"{tool_ver} (decoupled from content version)")
 
-    latest = out(["gh", "release", "list", "-R", "jebel-quant/rhiza", "-L", "1",
-                  "--json", "tagName", "--jq", ".[0].tagName"])
+    latest = out(
+        [
+            "gh",
+            "release",
+            "list",
+            "-R",
+            "jebel-quant/rhiza",
+            "-L",
+            "1",
+            "--json",
+            "tagName",
+            "--jq",
+            ".[0].tagName",
+        ]
+    )
     if latest:
         s.row("Latest rhiza release", f"{latest} ({'on latest' if latest == ref else 'behind'})")
     else:
@@ -639,8 +667,13 @@ def render_terminal(
         print()
 
 
-def render_html(headline: list[tuple[str, object]], summary: str, sections: list[Section],
-                title: str, generated: str) -> str:
+def render_html(
+    headline: list[tuple[str, object]],
+    summary: str,
+    sections: list[Section],
+    title: str,
+    generated: str,
+) -> str:
     e = html.escape
 
     def tiles() -> str:
@@ -652,19 +685,18 @@ def render_html(headline: list[tuple[str, object]], summary: str, sections: list
         return f'<div class="tiles">{cells}</div>'
 
     def section_html(s: Section) -> str:
-        rows = "".join(
-            f"<tr><th>{e(label)}</th><td>{e(fmt(v))}</td></tr>" for label, v in s.rows
-        )
+        rows = "".join(f"<tr><th>{e(label)}</th><td>{e(fmt(v))}</td></tr>" for label, v in s.rows)
         body = f"<table class='kv'>{rows}</table>" if rows else ""
         for t in s.tables:
             head = "".join(f"<th>{e(str(h))}</th>" for h in t["headers"])
             trs = "".join(
-                "<tr>" + "".join(f"<td>{e(fmt(c))}</td>" for c in r) + "</tr>"
-                for r in t["rows"]
+                "<tr>" + "".join(f"<td>{e(fmt(c))}</td>" for c in r) + "</tr>" for r in t["rows"]
             )
-            body += (f"<div class='caption'>{e(t['caption'])}</div>"
-                     f"<div class='scroll'><table class='data'><thead><tr>{head}</tr></thead>"
-                     f"<tbody>{trs}</tbody></table></div>")
+            body += (
+                f"<div class='caption'>{e(t['caption'])}</div>"
+                f"<div class='scroll'><table class='data'><thead><tr>{head}</tr></thead>"
+                f"<tbody>{trs}</tbody></table></div>"
+            )
         return f"<section><h2>{e(s.title)}</h2>{body}</section>"
 
     sections_html = "".join(section_html(s) for s in sections)
@@ -739,10 +771,12 @@ def render_html(headline: list[tuple[str, object]], summary: str, sections: list
 def main() -> None:
     global SLOW
     ap = argparse.ArgumentParser(description="Read-only repo statistics dashboard.")
-    ap.add_argument("path", nargs="?", default=None,
-                    help="path/pathspec to scope code-size metrics to")
-    ap.add_argument("--slow", action="store_true",
-                    help="permit slow/networked fallbacks (uvx, --outdated)")
+    ap.add_argument(
+        "path", nargs="?", default=None, help="path/pathspec to scope code-size metrics to"
+    )
+    ap.add_argument(
+        "--slow", action="store_true", help="permit slow/networked fallbacks (uvx, --outdated)"
+    )
     ap.add_argument("--no-html", action="store_true", help="skip writing docs/stats.html")
     ap.add_argument("--html-out", default=None, help="HTML output path (default: docs/stats.html)")
     args = ap.parse_args()
