@@ -19,12 +19,17 @@ Or, from a shell, `make install` runs the equivalent `claude` CLI commands:
 make install
 ```
 
-The commands then appear namespaced under the plugin: `/rhiza:boost`,
-`/rhiza:quality`, `/rhiza:revisit`, `/rhiza:stats`, `/rhiza:repos`. Type
-`/rhiza` to have Claude Code autocomplete them.
+The commands then appear namespaced under the plugin: `/rhiza:init`,
+`/rhiza:boost`, `/rhiza:quality`, `/rhiza:revisit`, `/rhiza:stats`,
+`/rhiza:repos`. Type `/rhiza` to have Claude Code autocomplete them.
 
 ## Commands
 
+- **`/rhiza:init`** — bootstrap a brand-new rhiza-managed repo in the current
+  empty folder: `git init`, ask whether it lives on GitHub or GitLab, ask
+  owner/name/visibility, scaffold `.rhiza/template.yml` with the matching
+  platform profile, create the remote, push, and apply the template with a
+  first sync.
 - **`/rhiza:boost`** — bump the current repo to the latest (or a given) rhiza
   release, sync the template, resolve conflicts upstream, run the quality gates,
   and open a PR with a quality scorecard.
