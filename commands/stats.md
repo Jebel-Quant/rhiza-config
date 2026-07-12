@@ -1,13 +1,16 @@
 ---
-description: Report a read-only statistics dashboard for the current repo — lines of code, lines of tests and their ratio, GitHub/GitLab stars, plus language mix, coverage, complexity, dependency counts, git activity, and rhiza template status. No scoring, no fixes, no issues.
+description: Report a read-only statistics dashboard for the current repo — lines of code, lines of tests and their ratio, GitHub/GitLab stars, plus language mix, coverage, complexity, dependency counts, git activity, and rhiza template status. Prints to the terminal and writes a self-contained docs/stats.html you can wire into mkdocs.yml. No scoring, no fixes, no issues.
 argument-hint: "[path or topic to scope the stats to]  (optional; defaults to the whole repo)"
-allowed-tools: Bash(git*), Bash(gh*), Bash(glab*), Bash(make*), Bash(find*), Bash(wc*), Bash(grep*), Bash(sort*), Bash(uniq*), Bash(head*), Bash(cat*), Bash(sed*), Bash(awk*), Bash(du*), Bash(uv*), Bash(uvx*), Bash(pip*), Bash(python3*), Read, Glob, Grep
+allowed-tools: Bash(git*), Bash(gh*), Bash(glab*), Bash(make*), Bash(find*), Bash(wc*), Bash(grep*), Bash(sort*), Bash(uniq*), Bash(head*), Bash(cat*), Bash(sed*), Bash(awk*), Bash(du*), Bash(uv*), Bash(uvx*), Bash(pip*), Bash(python3*), Bash(date*), Bash(mkdir*), Read, Glob, Grep, Write
 ---
 
 You are running `/stats` in the **current working directory's repo**.
-Goal: gather and present a concise **statistics dashboard** for this repo. This is
+Goal: gather and present a concise **statistics dashboard** for this repo, both as
+a terminal report (step 8) and as a self-contained `docs/stats.html` artifact
+(step 9) you can reference from `mkdocs.yml`. This is
 purely descriptive — it **counts and measures, it does not score, fix, or file
-anything**. (That's the division of labour: `/quality` judges and
+anything**. The lone artifact it writes is `docs/stats.html`; it never scores,
+edits source, or files issues. (That's the division of labour: `/quality` judges and
 scores; `/stats` just reports the numbers.) Adapt to whatever repo it
 runs in by reading its tree, `pyproject.toml`, git history, and `.rhiza/` config at
 runtime — don't hardcode paths or assume Python.
@@ -104,3 +107,26 @@ Then a one-line summary, e.g. `<name> — <LOC> LOC / <T> test LOC (ratio <R>),
 detailed sections. Mark any metric that couldn't be gathered as `n/a` with the reason.
 Do **not** editorialize into scores or recommendations — that's
 `/quality`'s job; point the user there if they want an assessment.
+
+## 9. Write the HTML dashboard (`docs/stats.html`)
+Also persist the **same numbers** from step 8 as a standalone HTML page so it can be
+served by mkdocs. This is the one file `/stats` writes — carry over exactly the metrics
+already gathered; do not recompute or fetch anything new for it.
+
+- **Location.** Write to `docs/stats.html` under the repo root (`mkdir -p docs` first if the dir is missing). Overwrite any existing `docs/stats.html` — it's a regenerated snapshot, not hand-edited.
+- **Self-contained, no network.** A full HTML document (`<!doctype html>` … `<html><head>…</head><body>…</body></html>`) with **all CSS inline** in a single `<style>` block. No external stylesheets, fonts, scripts, CDNs, or remote images — mkdocs copies the file verbatim into the built site and it must render offline. No JS is needed; keep it static.
+- **Theme-aware & responsive.** Support light and dark via `@media (prefers-color-scheme: dark)`. Use a `max-width` centered container, relative units, and wrap any wide table in a container with `overflow-x: auto` so the page never scrolls horizontally on a phone.
+- **Structure** mirrors the terminal report:
+  - A header with the repo name, current branch, and a **generated-on** date (`date '+%Y-%m-%d'`), plus a one-line note that it's a point-in-time snapshot.
+  - A **headline block** of stat tiles up top: source LOC, test LOC, test-to-code ratio, stars, open issues, branches, commits (total + last-90-days).
+  - Then the detailed sections (code size & language mix, tests & coverage, complexity, dependencies, git activity, rhiza template status) as simple cards/tables.
+  - Render `n/a` metrics as a muted "n/a" with the reason as a tooltip/small note — never omit them silently.
+- **Do NOT edit `mkdocs.yml`.** `/stats` only writes the HTML. In the step-10 report, print the exact nav snippet the user can paste, e.g.:
+  ```yaml
+  nav:
+    - Stats: stats.html
+  ```
+  and note that as raw HTML in `docs_dir` it renders as a standalone page (outside the Material theme chrome) — that's expected for this artifact.
+
+## 10. Report the artifact
+After the terminal dashboard, tell the user the `docs/stats.html` path was written (or overwritten) and show the `mkdocs.yml` nav snippet above so they can wire it in. Keep it to a couple of lines.
