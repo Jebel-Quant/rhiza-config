@@ -25,11 +25,13 @@ The commands then appear namespaced under the plugin: `/rhiza:init`,
 
 ## Commands
 
-- **`/rhiza:init`** — bootstrap a brand-new rhiza-managed repo in the current
-  empty folder: `git init`, ask whether it lives on GitHub or GitLab, ask
-  owner/name/visibility, scaffold `.rhiza/template.yml` with the matching
-  platform profile, create the remote, push, and apply the template with a
-  first sync.
+- **`/rhiza:init`** — bootstrap a rhiza-managed repo in the current folder
+  (empty, or an existing git repo that isn't managed yet): `git init` if
+  needed, ask whether it lives on GitHub or GitLab, ask owner/name/visibility,
+  optionally scaffold a minimal Python project (`pyproject.toml` + `src/` +
+  `tests/`) and `mkdocs.yml`, then put the `.rhiza` config and the first
+  template sync on a `rhiza_init_<date>` branch and open a PR — never pushing
+  rhiza changes straight to the default branch.
 - **`/rhiza:boost`** — bump the current repo to the latest (or a given) rhiza
   release, sync the template, resolve conflicts upstream, run the quality gates,
   and open a PR with a quality scorecard.
