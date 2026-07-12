@@ -1,0 +1,11 @@
+[run]
+omit =
+    scripts/release.sh
+
+[report]
+exclude_also =
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    raise NotImplementedError
+    pragma: no cover
+show_missing = true
