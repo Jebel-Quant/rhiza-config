@@ -2,8 +2,8 @@
 
 .PHONY: help install lint test validate stats book book-serve clean changelog release
 
-MARKETPLACE := Jebel-Quant/rhiza-config
-PLUGIN := rhiza@rhiza-config
+MARKETPLACE := Jebel-Quant/rhiza-claude
+PLUGIN := rhiza@rhiza-claude
 
 help:  ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \

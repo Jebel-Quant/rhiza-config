@@ -1,4 +1,4 @@
-# rhiza-config
+# rhiza-claude
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -6,14 +6,14 @@ A [Claude Code](https://claude.com/claude-code) plugin marketplace providing the
 **`rhiza`** plugin — slash commands for working in rhiza-managed repos (template
 sync, code-quality scoring, README/doc upkeep, and repo stats).
 
-📖 **Documentation:** <https://jebel-quant.github.io/rhiza-config/> — a dedicated
+📖 **Documentation:** <https://jebel-quant.github.io/rhiza-claude/> — a dedicated
 page for every command. Build it locally with `make book`.
 
 ## Install
 
 ```
-/plugin marketplace add Jebel-Quant/rhiza-config
-/plugin install rhiza@rhiza-config
+/plugin marketplace add Jebel-Quant/rhiza-claude
+/plugin install rhiza@rhiza-claude
 ```
 
 Or, from a shell, `make install` runs the equivalent `claude` CLI commands:

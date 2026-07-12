@@ -1,4 +1,4 @@
-# rhiza-config
+# rhiza-claude
 
 A [Claude Code](https://claude.com/claude-code) plugin marketplace providing the
 **`rhiza`** plugin — slash commands for working in
@@ -8,8 +8,8 @@ code-quality scoring, README/doc upkeep, and repo stats.
 ## Install
 
 ```
-/plugin marketplace add Jebel-Quant/rhiza-config
-/plugin install rhiza@rhiza-config
+/plugin marketplace add Jebel-Quant/rhiza-claude
+/plugin install rhiza@rhiza-claude
 ```
 
 Or, from a shell:

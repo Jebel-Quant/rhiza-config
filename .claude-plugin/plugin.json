@@ -7,8 +7,8 @@
     "name": "Jebel-Quant",
     "email": "thomas.schmelzer@gmail.com"
   },
-  "homepage": "https://github.com/Jebel-Quant/rhiza-config",
-  "repository": "https://github.com/Jebel-Quant/rhiza-config",
+  "homepage": "https://github.com/Jebel-Quant/rhiza-claude",
+  "repository": "https://github.com/Jebel-Quant/rhiza-claude",
   "license": "MIT",
   "keywords": ["rhiza", "template", "code-quality", "workflow", "scorecard"]
 }

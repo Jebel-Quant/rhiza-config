@@ -1,11 +1,11 @@
 INHERIT: docs/mkdocs-base.yml
 
-site_name: rhiza-config
+site_name: rhiza-claude
 site_description: The rhiza Claude Code plugin — slash commands for working in rhiza-managed repos.
 site_author: Jebel Quant
-site_url: https://jebel-quant.github.io/rhiza-config/
-repo_url: https://github.com/jebel-quant/rhiza-config
-repo_name: jebel-quant/rhiza-config
+site_url: https://jebel-quant.github.io/rhiza-claude/
+repo_url: https://github.com/jebel-quant/rhiza-claude
+repo_name: jebel-quant/rhiza-claude
 copyright: Copyright &copy; 2026 Jebel Quant
 
 nav:
@@ -27,7 +27,7 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/jebel-quant/rhiza-config
+      link: https://github.com/jebel-quant/rhiza-claude
 
 theme:
   icon:
