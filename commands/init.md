@@ -54,15 +54,24 @@ Work through these steps. Stop and report if a precondition fails.
 - If `HAS_GIT` is true, **skip init entirely** — the repo already exists. Keep its
   current branch; do not rename or reset it.
 
-## 3. Choose the platform (GitHub vs GitLab)
-- **If `EXISTING_ORIGIN` was found in step 1**, detect the host from its URL
-  (`github.com` → GitHub; `gitlab.com` or a self-hosted GitLab host → GitLab) and
-  make **that the recommended, first option**. The remote already exists, so
-  step 7 will skip creation and just push to it.
-- **Otherwise** (no origin) list **GitHub first and marked "(Recommended)"**,
-  GitLab second.
+> **Shortcut for a fully-fledged repo.** If `EXISTING_ORIGIN` was found in
+> step 1, the repo already exists remotely — its platform, owner, and name are
+> all determined by that remote, so **skip the questions in steps 3 and 4
+> entirely**. Derive everything from the URL, report what you detected, and go
+> straight to step 5:
+> - platform/profile from the host (`github.com` → GitHub/`github-project`;
+>   `gitlab.com` or a self-hosted GitLab host → GitLab/`gitlab-project`);
+> - `OWNER`/`NAME` from the URL path;
+> - no `VISIBILITY` — the remote already has one; `/init` won't change it.
+>
+> No platform CLI (`gh`/`glab`) is needed on this path — the remote exists, so
+> step 7 just `git push`es to it. Steps 3 and 4 below are **only** for the
+> no-remote (empty-folder / local-only) case.
 
-Present the menu with `AskUserQuestion`:
+## 3. Choose the platform (GitHub vs GitLab)
+No `origin` remote to go on, so ask where the repo shall live. Present the menu
+with `AskUserQuestion`, **GitHub first and marked "(Recommended)"**, GitLab
+second:
 - **GitHub** → platform `github`, profile `github-project`, CLI `gh`.
 - **GitLab** → platform `gitlab`, profile `gitlab-project`, CLI `glab`.
 
@@ -75,18 +84,12 @@ remote/push/sync (steps 7–9) are pending auth.
 ## 4. Collect repo details (ask each run)
 Gather via `AskUserQuestion` (offer sensible defaults, let the user override):
 - **Owner / namespace** — the GitHub org-or-user, or GitLab group/namespace, that
-  will own the repo. If `EXISTING_ORIGIN` was found, parse its owner as the
-  default; otherwise no safe default — ask.
-- **Repository name** — default to the name parsed from `EXISTING_ORIGIN` if
-  present, else `$ARGUMENTS` if given, else `basename "$PWD"`.
-- **Visibility** — private (recommended default) or public. Skip this if
-  `EXISTING_ORIGIN` was found (the remote already exists with its own visibility;
-  don't try to change it).
+  will own the repo. No safe default; ask.
+- **Repository name** — default to `$ARGUMENTS` if given, else `basename "$PWD"`.
+- **Visibility** — private (recommended default) or public.
 
 Hold these as `OWNER`, `NAME`, `VISIBILITY` for the remaining steps. The full
-slug is `OWNER/NAME`. When `EXISTING_ORIGIN` is present, `OWNER/NAME` should
-match it — if the user's answers diverge from the existing remote, stop and ask
-which they mean rather than guessing.
+slug is `OWNER/NAME`.
 
 ## 5. Resolve the template version
 - Template content version: latest `jebel-quant/rhiza` release —
