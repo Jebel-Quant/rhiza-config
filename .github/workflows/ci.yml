@@ -44,4 +44,4 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: Run tests with coverage gate
-        run: uvx --with pytest-cov pytest tests/ --cov=scripts --cov-report=term-missing --cov-fail-under=80
+        run: uvx --with pytest-cov pytest tests/ --cov=scripts --cov-report=term-missing --cov-fail-under=100
