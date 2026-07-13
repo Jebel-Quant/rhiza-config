@@ -5,6 +5,11 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com),
 and entries are generated from [Conventional Commits](https://www.conventionalcommits.org).
 
+## [0.4.1] - 2026-07-13
+
+### Maintenance
+- Drop the retired .rhiza-version tool-version field (#31)
+
 ## [0.4.0] - 2026-07-13
 
 ### New Features
