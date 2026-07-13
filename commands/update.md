@@ -8,7 +8,7 @@ You are running `/update` in the **current working directory's repo**. Goal: bum
 
 Argument (optional): `$ARGUMENTS` — an explicit template version tag like `v0.19.9`. If empty, use the latest release.
 
-**Important — two independent version fields.** `.rhiza/template.yml`'s `template-branch`/`ref` is the *template content* version (tracks `jebel-quant/rhiza` releases). `.rhiza/.rhiza-version` is the *rhiza tool* version (tracks `rhiza-cli` releases, currently pinned at `0.18.0` across all repos). They are NOT the same number and must not be derived from each other. This command bumps **only the template `ref`** and leaves `.rhiza-version` untouched.
+**Version field.** `.rhiza/template.yml`'s `template-branch`/`ref` is the template content version (tracks `jebel-quant/rhiza` releases). This command bumps that `ref`.
 
 Work through these steps. Stop and report if any precondition fails.
 
@@ -50,7 +50,6 @@ If the choice **differs** from the current profile, also reconcile platform-spec
 ## 5. Edit template.yml (version + profile) + commit the bump
 - On `$BRANCH`, set `template-branch:` (or `ref:`, whichever key is present) to `"<TARGET>"`.
 - If step 3 chose a different platform, set `profiles:` (and any reconciled `templates:`) accordingly.
-- Do NOT touch `.rhiza/.rhiza-version` — it is the decoupled tool version (see note above).
 - `git add .rhiza/template.yml`
 - `git commit -m "chore: bump rhiza to <TARGET>"` (if step 3 switched platform, append `" (switch to <github|gitlab>-project)"` to the message)
 - `git push --set-upstream origin "$BRANCH"`

@@ -121,9 +121,6 @@ Runs on **both** paths (a repo can be Go even when it already has a remote).
   (falls back to `git ls-remote --tags` for a GitLab-hosted template repo). If
   neither works, ask the user for the tag (e.g. `v1.1.3`).
 
-Note: `.rhiza/.rhiza-version` (the rhiza **tool** version, distinct from `TARGET`)
-is *not* written here — the sync in step 9 delivers it, matching `rhiza init`.
-
 ## 6. Establish the remote and the default branch
 Every rhiza change goes on a branch (step 7) and out as a PR (step 10), so first
 make sure there's a remote **and** a non-empty default branch to be the PR base.
@@ -197,8 +194,7 @@ make sync
 (equivalent to `uvx rhiza sync .`, which you can run directly if `make` is
 unavailable). This materialises the template for the chosen profile —
 `.rhiza/rhiza.mk`, CI workflows (`.github/workflows/*` for GitHub or
-`.gitlab-ci.yml` for GitLab), `docs/mkdocs-base.yml`, `.rhiza/.rhiza-version`,
-and the rest.
+`.gitlab-ci.yml` for GitLab), `docs/mkdocs-base.yml`, and the rest.
 - On a truly **empty** folder there's nothing to conflict with, so a non-zero
   exit is unexpected — capture the output and report it rather than papering
   over it.
