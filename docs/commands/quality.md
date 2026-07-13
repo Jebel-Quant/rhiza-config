@@ -20,11 +20,11 @@ The optional argument scopes the assessment; it defaults to the whole repo.
    with a self-contained title, the current→target score, the specific
    file(s)/config, a `done when…` acceptance criterion, and an evidence snippet.
 4. **Optionally files issues** for the findings (deduped), unless invoked in
-   assessment-only mode (as [`/rhiza:boost`](boost.md) does).
+   assessment-only mode (as [`/rhiza:update`](update.md) does).
 
 ## Notes
 
 - Respects the locally-owned-vs-Rhiza-owned scoping rule, so template-managed
   files aren't scored against you.
-- Assessment-only by default when driven from `boost`; it files no issues and
+- Assessment-only by default when driven from `update`; it files no issues and
   applies no code fixes there.

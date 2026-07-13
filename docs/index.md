@@ -27,8 +27,8 @@ These are the AI-driven workflow commands. Each has its own page.
 
 | Command | What it does |
 | --- | --- |
-| [`/rhiza:init`](commands/init.md) | Bootstrap a rhiza-managed repo from scratch: git init, platform choice, scaffold, first sync, PR. |
-| [`/rhiza:boost`](commands/boost.md) | Bump to the latest rhiza release, sync, run the quality gates, open a scorecard PR. |
+| [`/rhiza:install`](commands/install.md) | Bootstrap a rhiza-managed repo from scratch: git init, platform choice, scaffold, first sync, PR. |
+| [`/rhiza:update`](commands/update.md) | Bump to the latest rhiza release, sync, run the quality gates, open a scorecard PR. |
 | [`/rhiza:quality`](commands/quality.md) | Run the code-quality gate and score the repo 1–10 across eight categories. |
 | [`/rhiza:revisit`](commands/revisit.md) | Create or refresh `README.md`, `CLAUDE.md`, and `mkdocs.yml`. |
 | [`/rhiza:stats`](commands/stats.md) | A read-only statistics dashboard for the repo. |

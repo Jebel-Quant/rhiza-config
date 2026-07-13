@@ -1,15 +1,15 @@
 ---
-description: Bootstrap a rhiza-managed repo in the current folder (empty, or an existing git repo that isn't yet rhiza-managed) — git init if needed, ask whether it lives on GitHub or GitLab (auto-detecting an existing remote), ask owner/name/visibility, pick language (python/go) and template repo (default jebel-quant/rhiza or rhiza-go, with a reachability check), optionally scaffold the project (pyproject/src/tests, mkdocs.yml, a real starter README) via the bundled init_scaffold.py, validate the config, then put the scaffold and the first template sync on a `rhiza_init_<date>` branch and open a PR. Never pushes rhiza changes straight to the default branch.
+description: Bootstrap a rhiza-managed repo in the current folder (empty, or an existing git repo that isn't yet rhiza-managed) — git init if needed, ask whether it lives on GitHub or GitLab (auto-detecting an existing remote), ask owner/name/visibility, pick language (python/go) and template repo (default jebel-quant/rhiza or rhiza-go, with a reachability check), optionally scaffold the project (pyproject/src/tests, mkdocs.yml, a real starter README) via the bundled init_scaffold.py, validate the config, then put the scaffold and the first template sync on a `rhiza_install_<date>` branch and open a PR. Never pushes rhiza changes straight to the default branch.
 argument-hint: "[repo name]  (optional; defaults to the current folder name)"
 allowed-tools: Bash(git*), Bash(gh*), Bash(glab*), Bash(uvx*), Bash(make*), Bash(python3*), Bash(cat*), Bash(ls*), Bash(basename*), Bash(pwd*), Bash(date*), Read, Write, AskUserQuestion
 ---
 
-You are running `/init` in the **current working directory**. Goal: turn this
+You are running `/install` in the **current working directory**. Goal: turn this
 folder into a fresh **rhiza-managed** repository — initialise git (if it isn't
 already), decide where it lives (GitHub or GitLab), scaffold the `.rhiza/` config
 for that platform, apply the rhiza template with a first sync, and **open a PR**
 with that work. After it merges, the repo is a normal rhiza-managed repo where
-`/boost`, `/quality`, and `make sync` all work.
+`/update`, `/quality`, and `make sync` all work.
 
 The folder may be **empty** or may **already contain a git repo** (a `.git/` you
 `git init`'d earlier, possibly with commits and even an `origin` remote) — as
@@ -18,7 +18,7 @@ re-init an existing repo, and never clobber an existing remote.
 
 **Never push rhiza changes to the default branch.** The `.rhiza` scaffold and the
 template sync (which can be hundreds of files, including CI) go on a dedicated
-`rhiza_init_<date>` branch and are delivered as a PR, so they get reviewed — this
+`rhiza_install_<date>` branch and are delivered as a PR, so they get reviewed — this
 matters most in an existing repo whose default branch may be protected. The only
 thing that ever lands on the default branch directly is the empty initial commit
 that seeds a brand-new repo (step 6), because a PR needs a base branch to exist.
@@ -36,7 +36,7 @@ Work through these steps. Stop and report if a precondition fails.
 
 ## 1. Preconditions — and detect the starting state
 - **Already rhiza-managed?** If `.rhiza/template.yml` exists, abort and point at
-  `/boost` — this command is for repos that aren't managed yet.
+  `/update` — this command is for repos that aren't managed yet.
 - **Is there already a git repo?** Run `git rev-parse --is-inside-work-tree`
   (ignore its error if absent). Record `HAS_GIT` accordingly. If yes, capture the
   existing state — you'll reuse it, not recreate it:
@@ -48,7 +48,7 @@ Work through these steps. Stop and report if a precondition fails.
     (record as `EXISTING_ORIGIN`).
 - **Folder contents.** Run `ls -A`. If it contains files beyond an expected
   `.git/` and ordinary dotfiles, list them and ask the user (`AskUserQuestion`)
-  whether to proceed — `/init` layers `.rhiza/` config plus a large template sync
+  whether to proceed — `/install` layers `.rhiza/` config plus a large template sync
   on top of whatever is here. Do not proceed without a yes.
 - Confirm `uvx` is available (`uvx --version`). It's required for the bootstrap
   sync in step 9. If missing, you can still scaffold, branch, and (for a
@@ -70,11 +70,11 @@ Work through these steps. Stop and report if a precondition fails.
 > - platform/profile from the host (`github.com` → GitHub/`github-project`;
 >   `gitlab.com` or a self-hosted GitLab host → GitLab/`gitlab-project`);
 > - `OWNER`/`NAME` from the URL path;
-> - no `VISIBILITY` — the remote already has one; `/init` won't change it.
+> - no `VISIBILITY` — the remote already has one; `/install` won't change it.
 >
 > Steps 3 and 4 below are **only** for the no-remote (empty-folder) case. Note
 > that opening the PR (step 10) still needs the platform CLI (`gh`/`glab`) even
-> on this path; if it's unavailable, `/init` pushes the branch and hands you a
+> on this path; if it's unavailable, `/install` pushes the branch and hands you a
 > "create PR" URL instead.
 
 ## 3. Choose the platform (GitHub vs GitLab)
@@ -142,15 +142,15 @@ Determine the default branch name `DEFAULT` (existing repo:
       `git push -u origin "$DEFAULT"`.
   - If creation fails because the name is already taken remotely, stop and report
     — do not overwrite or force-push. (If it's actually *your* repo, add it as
-    `origin` and re-run; `/init` will take the existing-remote path.)
+    `origin` and re-run; `/install` will take the existing-remote path.)
 - **Existing repo with `origin`:** don't create anything. Fetch so the branch is
   based on the current tip: `git fetch origin`. If the repo had commits on an
   unpushed local default branch but no remote default yet, push it first
   (`git push -u origin "$DEFAULT"`) so the PR has a base.
 
 ## 7. Create the work branch
-- `BRANCH=rhiza_init_$(date +%Y%m%d)`. If that branch already exists locally or on
-  the remote, disambiguate with a time suffix: `rhiza_init_$(date +%Y%m%d-%H%M%S)`.
+- `BRANCH=rhiza_install_$(date +%Y%m%d)`. If that branch already exists locally or on
+  the remote, disambiguate with a time suffix: `rhiza_install_$(date +%Y%m%d-%H%M%S)`.
 - Branch off the up-to-date default — **never commit the rhiza work onto
   `DEFAULT`**:
   - existing remote: `git checkout -b "$BRANCH" "origin/$DEFAULT"`;
@@ -204,7 +204,7 @@ and the rest.
   over it.
 - If the folder **already had files**, the sync may report conflicts or leave
   `.rej` files where a template file overlaps something you already had. Resolve
-  them the same way `/boost` does — take the **upstream (template) side** — then
+  them the same way `/update` does — take the **upstream (template) side** — then
   continue; if anything is ambiguous, stop and show the conflicting files rather
   than guessing.
 
