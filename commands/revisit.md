@@ -36,7 +36,7 @@ Gather the facts the badges and docs depend on — do not hardcode `jebel-quant/
   - No remote → ask the user for `owner/repo` and platform, or scaffold with `OWNER`/`REPO` placeholders and flag them in the report.
 - **Default branch:** `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name` (GitHub) / `glab repo view` (GitLab), fallback `main`.
 - **Project type & metadata:**
-  - Python/rhiza repo? `pyproject.toml` present → read `project.name`, `project.requires-python` / classifiers (→ Python versions), `project.license`, and whether it's published (`gh` release exists, or a PyPI name). Also check `.rhiza/template.yml` (`ref`/`template-branch` → template version) and `.rhiza/.rhiza-version`.
+  - Python/rhiza repo? `pyproject.toml` present → read `project.name`, `project.requires-python` / classifiers (→ Python versions), `project.license`, and whether it's published (`gh` release exists, or a PyPI name). Also check `.rhiza/template.yml` (`ref`/`template-branch` → template version).
   - Non-Python repo (e.g. this `claude-config` repo) → skip Python-specific badges; keep the platform, license, and CI badges that still apply.
 - **CI workflow file(s):** `find .github/workflows -maxdepth 1 -name '*.yml'` (GitHub) or `.gitlab-ci.yml` (GitLab). The CI badge must point at a workflow file that actually exists — prefer one named like `*ci*` (rhiza ships `rhiza_ci.yml`); if none, omit the CI badge and note it.
 - **License:** presence of a `LICENSE`/`LICENSE.md` file and its type (read the SPDX header or `pyproject` license). Omit the license badge if there is no license file.

@@ -30,6 +30,5 @@ latest release.
 
 ## Notes
 
-- Bumps only the **template content** version (`ref` / `template-branch`); it
-  leaves the decoupled rhiza **tool** version (`.rhiza/.rhiza-version`) untouched.
+- Bumps the **template content** version (`ref` / `template-branch`).
 - Restores the branch you started on when it finishes.

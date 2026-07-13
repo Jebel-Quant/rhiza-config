@@ -292,7 +292,6 @@ def test_section_rhiza_with_status_json(tmp_path, monkeypatch):
     (rhiza / "template.yml").write_text(
         'repository: "jebel-quant/rhiza"\nref: "v1.1.3"\nprofiles:\n  - github-project\n'
     )
-    (rhiza / ".rhiza-version").write_text("0.18.0\n")
     status = json.dumps(
         {
             "ref": "v1.1.3",

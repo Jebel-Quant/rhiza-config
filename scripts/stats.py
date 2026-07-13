@@ -651,13 +651,6 @@ def section_rhiza(root: Path) -> tuple[Section, dict[str, Any]]:
         if status.get("strategy"):
             s.row("Sync strategy", str(status["strategy"]))
 
-    ver_file = root / ".rhiza" / ".rhiza-version"
-    if ver_file.exists():
-        tool_ver = ver_file.read_text(errors="ignore").strip()
-    else:
-        tool_ver = na("no .rhiza-version")
-    s.row("Rhiza tool version", f"{tool_ver} (decoupled from content version)")
-
     latest = out(
         [
             "gh",
