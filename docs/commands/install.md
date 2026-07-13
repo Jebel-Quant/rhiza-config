@@ -1,10 +1,10 @@
-# `/rhiza:init`
+# `/rhiza:install`
 
 Bootstrap a **rhiza-managed repo** in the current folder — empty, or an existing
 git repo that isn't managed yet.
 
 ```
-/rhiza:init [repo name]
+/rhiza:install [repo name]
 ```
 
 The optional argument is the repository name; it defaults to the current folder's
@@ -13,7 +13,7 @@ name.
 ## What it does
 
 1. **Detects the starting state** — aborts if the repo is already rhiza-managed
-   (use [`/rhiza:boost`](boost.md) instead); otherwise handles both an empty
+   (use [`/rhiza:update`](update.md) instead); otherwise handles both an empty
    folder and an existing `.git` (with commits and/or an `origin` remote).
 2. **`git init`** only when there's no repo yet — never re-inits or renames an
    existing branch.
@@ -27,7 +27,7 @@ name.
    skeleton (`pyproject.toml` + `src/` + `tests/`), `mkdocs.yml`, and a real
    starter `README.md`. Creates only what's missing; never overwrites.
 6. **Validates** the config, then puts the scaffold and the first template sync
-   on a `rhiza_init_<date>` branch and **opens a PR** — never pushing rhiza
+   on a `rhiza_install_<date>` branch and **opens a PR** — never pushing rhiza
    changes straight to the default branch.
 
 ## Notes

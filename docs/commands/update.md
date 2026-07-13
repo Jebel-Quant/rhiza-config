@@ -1,10 +1,10 @@
-# `/rhiza:boost`
+# `/rhiza:update`
 
 Bump the current repo to a rhiza release, apply the template sync, run the
 quality gates, and open a PR with a quality scorecard.
 
 ```
-/rhiza:boost [version e.g. v0.19.9]
+/rhiza:update [version e.g. v0.19.9]
 ```
 
 The optional argument pins an explicit template version tag; it defaults to the

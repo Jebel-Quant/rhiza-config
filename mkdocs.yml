@@ -11,8 +11,8 @@ copyright: Copyright &copy; 2026 Jebel Quant
 nav:
   - Home: index.md
   - Commands:
-      - init: commands/init.md
-      - boost: commands/boost.md
+      - install: commands/install.md
+      - update: commands/update.md
       - quality: commands/quality.md
       - revisit: commands/revisit.md
       - stats: commands/stats.md

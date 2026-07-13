@@ -4,7 +4,7 @@ argument-hint: "[version e.g. v0.19.9]  (optional; defaults to latest release)"
 allowed-tools: Bash(git*), Bash(gh*), Bash(glab*), Bash(make*), Bash(python3*), Bash(cat*), Bash(grep*), Read, Edit, Write, AskUserQuestion, Skill
 ---
 
-You are running `/boost` in the **current working directory's repo**. Goal: bump this one repo to a rhiza release, apply the template sync, resolve any conflicts by taking the upstream side, run the project's quality gates, and open a PR that includes a quality scorecard. Mirror the per-repo flow of `update_rhiza_versions.py` but resolve the version dynamically.
+You are running `/update` in the **current working directory's repo**. Goal: bump this one repo to a rhiza release, apply the template sync, resolve any conflicts by taking the upstream side, run the project's quality gates, and open a PR that includes a quality scorecard. Mirror the per-repo flow of `update_rhiza_versions.py` but resolve the version dynamically.
 
 Argument (optional): `$ARGUMENTS` — an explicit template version tag like `v0.19.9`. If empty, use the latest release.
 
@@ -15,7 +15,7 @@ Work through these steps. Stop and report if any precondition fails.
 ## 1. Preconditions
 - Confirm `.rhiza/template.yml` exists in the repo root. If not, abort: "Not a rhiza-managed repo (no .rhiza/template.yml)."
 - Confirm the working tree is clean (`git status --porcelain`). If dirty, stop and show the dirty files — do not proceed over uncommitted work.
-- Note the current branch as `ORIG_BRANCH` (`git branch --show-current`) and the default branch (`gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`, fallback `main`). `/boost` restores `ORIG_BRANCH` on the way out (step 13).
+- Note the current branch as `ORIG_BRANCH` (`git branch --show-current`) and the default branch (`gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`, fallback `main`). `/update` restores `ORIG_BRANCH` on the way out (step 13).
 - Note the **hosting platform** from `git remote get-url origin` (contains `github.com` → GitHub; `gitlab.com` or a self-hosted GitLab host → GitLab) and the current `profiles:` + `templates:` in `.rhiza/template.yml`. These are the "findings" for the platform menu in step 3.
 
 ## 2. Resolve target version
@@ -41,7 +41,7 @@ If the choice **differs** from the current profile, also reconcile platform-spec
 
 ## 4. Branch off the default branch
 - `BRANCH=rhiza_<TARGET>`
-- **Always base the branch on the up-to-date default branch — never on the invocation branch.** `/boost` may be run from any branch, but the PR must contain only the template bump, not whatever diverged on the current branch. Create the branch *before* editing any files, so the edit in step 5 lands on a clean base:
+- **Always base the branch on the up-to-date default branch — never on the invocation branch.** `/update` may be run from any branch, but the PR must contain only the template bump, not whatever diverged on the current branch. Create the branch *before* editing any files, so the edit in step 5 lands on a clean base:
   - `git fetch origin <DEFAULT_BRANCH>`
   - `git checkout -b "$BRANCH" "origin/<DEFAULT_BRANCH>"` — create the branch off the freshly-fetched default.
   - If `$BRANCH` already exists locally, `git checkout "$BRANCH"` instead (assume a prior run created it off the same base).
@@ -69,9 +69,9 @@ Run the quality gates and produce the scorecard by **invoking the `quality` comm
 do **not** re-specify the gates, scoring rubric, or scoping rule here. `quality` already
 encapsulates the correct gate set (`src/`-aware coverage downstream vs. the mother repo's `make rhiza-test`), the locally-owned-vs-Rhiza-owned scoping rule, and the platform, adapting to whichever repo it runs in. Delegating is what keeps this command from drifting as the template evolves — the single reason for this step's existence.
 
-Invoke it in **assessment-only, boost mode** — pass these constraints when you invoke it:
+Invoke it in **assessment-only, update mode** — pass these constraints when you invoke it:
 - Run **all** gates (cheapest first, bare `make <target>` per the command-execution policy) even after an early failure, then produce (a) the per-gate PASS/FAIL summary, (b) the 1–10 scorecard, and (c) the actionable findings list — then **stop**.
-- Apply **no** code fixes beyond what `make fmt` auto-formats, and file **no** issues. `boost` owns issue filing in step 11 (with dedup), and a template-bump PR must not carry surprise code edits. `quality` is assessment-only by default; if it surfaces an issue-filing menu (as it may in the mother repo), decline it.
+- Apply **no** code fixes beyond what `make fmt` auto-formats, and file **no** issues. `update` owns issue filing in step 11 (with dedup), and a template-bump PR must not carry surprise code edits. `quality` is assessment-only by default; if it surfaces an issue-filing menu (as it may in the mother repo), decline it.
 
 `make fmt` may auto-format files during the gate run; that's expected — those fixes get folded into the sync commit in step 9.
 
@@ -80,7 +80,7 @@ From `quality`'s output, capture for the later steps:
 - the **rendered scorecard** (1–10 subcategories + overall + highest-leverage improvement) → PR body (step 10);
 - the **findings list**, one per subcategory scoring below 10. Step 11 files these as issues, so ensure each finding carries: a self-contained **title** (e.g. `Raise test coverage on src/foo.py from 84% to 100%`), the **subcategory** and **current→target** score, the specific **file(s)/lines or config**, a crisp **`done when…`** acceptance criterion, and a one-line **evidence** snippet from the gate output. If `quality` omits the evidence line, augment each finding with it from the captured gate output. Order by leverage (biggest score gain for least effort first).
 
-Persist both artifacts for the next steps: write the scorecard to `$SCRATCHPAD/rhiza_boost_pr_body.md` and the findings to `$SCRATCHPAD/rhiza_boost_findings.md` if a scratchpad path is available, else hold them in context.
+Persist both artifacts for the next steps: write the scorecard to `$SCRATCHPAD/rhiza_update_pr_body.md` and the findings to `$SCRATCHPAD/rhiza_update_findings.md` if a scratchpad path is available, else hold them in context.
 
 > **Note (rhiza ≥ v1.0.0):** if `quality` runs both `make validate` and `make test` and the full `pytest` session appears inside the `make validate` output, the suite ran twice. That is now an upstream `rhiza_quality`/template concern — flag it, don't patch it here.
 
@@ -115,7 +115,7 @@ Persist both artifacts for the next steps: write the scorecard to `$SCRATCHPAD/r
 - If the PR already exists, update its body (`gh pr edit <BRANCH> --body-file <PR_BODY_FILE>`) and report the existing URL instead of erroring.
 
 ## 11. File issues for below-10 findings (after confirmation, with dedup)
-The findings from step 8 also live in the PR scorecard, but `boost` owns filing them as tracked issues — `quality` deliberately skipped its own issue-filing menu because it was invoked in boost mode. Do this here:
+The findings from step 8 also live in the PR scorecard, but `update` owns filing them as tracked issues — `quality` deliberately skipped its own issue-filing menu because it was invoked in update mode. Do this here:
 
 - **Dedup first.** List the repo's existing open issues so you don't file duplicates:
   - GitHub → `gh issue list --state open --limit 200 --json number,title --jq '.[] | "#\(.number) \(.title)"'`
