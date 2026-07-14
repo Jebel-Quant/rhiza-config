@@ -1,0 +1,78 @@
+name: Plugin
+
+# Smoke-test that the rhiza plugin actually installs from this checkout and that
+# every command we ship registers. Runs the real `claude` CLI against the repo
+# as a local marketplace — these are local config operations, so no API key or
+# login is required.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: plugin-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install-smoke:
+    name: install smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install the Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Validate the marketplace manifest
+        run: claude plugin validate .
+
+      - name: Add this checkout as a local marketplace
+        run: claude plugin marketplace add "$GITHUB_WORKSPACE"
+
+      - name: Install the rhiza plugin
+        run: claude plugin install rhiza@rhiza-claude
+
+      - name: Assert the plugin installed, is enabled, and every command registered
+        run: |
+          set -euo pipefail
+
+          echo "::group::installed plugins"
+          plugins="$(claude plugin list --json)"
+          echo "$plugins"
+          echo "::endgroup::"
+
+          echo "$plugins" \
+            | jq -e '.[] | select(.id == "rhiza@rhiza-claude" and .enabled == true)' \
+              > /dev/null
+          echo "✓ rhiza@rhiza-claude installed and enabled"
+
+          echo "::group::plugin details"
+          details="$(claude plugin details rhiza@rhiza-claude)"
+          echo "$details"
+          echo "::endgroup::"
+
+          # Every command .md we ship must surface as a registered command.
+          missing=0
+          total=0
+          for f in commands/*.md; do
+            total=$((total + 1))
+            name="$(basename "$f" .md)"
+            if ! grep -qw "$name" <<<"$details"; then
+              echo "✗ command '$name' is not registered by the installed plugin"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+          echo "✓ all $total commands registered"
