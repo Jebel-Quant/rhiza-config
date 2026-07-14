@@ -13,11 +13,13 @@ name.
 
 ## What it does
 
-1. **Checks preconditions** — aborts if a `.rhiza/` directory already exists (the
-   repo is already managed → use [`/rhiza:update`](update.md) instead), and
-   **errors out if the current directory isn't a git repo** (run `git init`
-   first). Otherwise it adapts to the existing state — a fresh `.git` with no
-   commits, or an established repo with commits and/or an `origin` remote.
+1. **Checks preconditions** — if a `.rhiza/` directory already exists the repo is
+   already managed, so `/init` **hands off to [`/rhiza:update`](update.md)** to
+   bring the template to its latest version (it never touches an existing
+   `template.yml`) and stops. It also **errors out if the current directory isn't
+   a git repo** (run `git init` first). Otherwise it adapts to the existing
+   state — a fresh `.git` with no commits, or an established repo with commits
+   and/or an `origin` remote.
 2. **Never runs `git init`** — the repo must already exist; it keeps the current
    branch and never re-inits or renames it.
 3. **Asks GitHub vs GitLab** (auto-detecting the host from an existing `origin`),

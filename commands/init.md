@@ -1,7 +1,7 @@
 ---
-description: Bootstrap a rhiza-managed repo in the current folder — assumes you're already inside a git repo (errors out if not) that isn't yet rhiza-managed (no `.rhiza/` yet), asks whether it lives on GitHub or GitLab (auto-detecting an existing remote), ask owner/name/visibility, pick language (python/go) and template repo (default jebel-quant/rhiza or rhiza-go, with a reachability check), optionally scaffold the project (pyproject/src/tests, mkdocs.yml, a real starter README) via the bundled init_scaffold.py, validate the config and run the template test suite (enhancing a pre-existing pyproject.toml if it fails a structural check), then put the scaffold and the first template sync on a `rhiza_init_<date>` branch and open a PR. Never pushes rhiza changes straight to the default branch.
+description: Bootstrap a rhiza-managed repo in the current folder — assumes you're already inside a git repo (errors out if not). If the repo is already rhiza-managed (a `.rhiza/` directory exists), it does NOT bootstrap: it hands off to `/update` to bring the template to its latest version and never touches template.yml itself. Otherwise it asks whether the repo lives on GitHub or GitLab (auto-detecting an existing remote), asks owner/name/visibility, picks language (python/go) and template repo (default jebel-quant/rhiza or rhiza-go, with a reachability check), optionally scaffolds the project (pyproject/src/tests, mkdocs.yml, a real starter README) via the bundled init_scaffold.py, validates the config and runs the template test suite (enhancing a pre-existing pyproject.toml if it fails a structural check), then puts the scaffold and the first template sync on a `rhiza_init_<date>` branch and opens a PR. Never pushes rhiza changes straight to the default branch.
 argument-hint: "[repo name]  (optional; defaults to the current folder name)"
-allowed-tools: Bash(git*), Bash(gh*), Bash(glab*), Bash(uvx*), Bash(make*), Bash(python3*), Bash(cat*), Bash(ls*), Bash(basename*), Bash(pwd*), Bash(date*), Read, Write, Edit, AskUserQuestion
+allowed-tools: Bash(git*), Bash(gh*), Bash(glab*), Bash(uvx*), Bash(make*), Bash(python3*), Bash(cat*), Bash(ls*), Bash(basename*), Bash(pwd*), Bash(date*), Read, Write, Edit, AskUserQuestion, Skill
 ---
 
 You are running `/init` in the **current working directory**. Goal: turn this
@@ -14,9 +14,13 @@ the repo is a normal rhiza-managed repo where `/update`, `/quality`, and
 **`/init` does not create the git repo — you must already be inside one.** If the
 current directory isn't a git working tree, stop with an error telling the user
 to run `git init` first (see step 1). The repo may be fresh (a `.git/` with no
-commits) or established (commits, and even an `origin` remote) — as long as it
-isn't rhiza-managed yet. Adapt to which it is: never re-init or reset the repo,
-and never clobber an existing remote.
+commits) or established (commits, and even an `origin` remote). Adapt to which it
+is: never re-init or reset the repo, and never clobber an existing remote.
+
+**`/init` is only for repos that aren't rhiza-managed yet.** If a `.rhiza/`
+directory already exists, `/init` hands off to `/update` (bringing the template
+to its latest version) instead of bootstrapping — it never touches an existing
+`.rhiza/template.yml`. See step 1.
 
 **Never push rhiza changes to the default branch.** The `.rhiza` scaffold and the
 template sync (which can be hundreds of files, including CI) go on a dedicated
@@ -37,12 +41,16 @@ a brand-new repo, and every sync afterward uses the template's own target.
 Work through these steps. Stop and report if a precondition fails.
 
 ## 1. Preconditions — and detect the starting state
-Run these checks first, in order, and **stop** on the first that fails:
-- **Not already rhiza-managed?** Check for a `.rhiza/` directory (`test -d .rhiza`).
-  If it exists at all, abort and point at `/update` — `/init` is only for repos
-  that aren't managed yet, and it must never write over an existing `.rhiza/`
-  config. A stray `.rhiza/` even without a `template.yml` is still a stop: report
-  it rather than clobbering it.
+Run these checks first, in order:
+- **Already rhiza-managed? → hand off to `/update`.** Check for a `.rhiza/`
+  directory (`test -d .rhiza`). If it exists, the repo is already managed, so
+  `/init` does **not** bootstrap it: **invoke the `update` command via the Skill
+  tool** to bring the template to its latest version, then stop — `/init` is
+  done. On this path, do **not** scaffold, and do **not** touch
+  `.rhiza/template.yml` (or anything else under `.rhiza/`) yourself: bumping an
+  existing config is `/update`'s job, and `/init` must never overwrite it. This
+  holds even for a stray `.rhiza/` without a `template.yml` — hand it to
+  `/update` rather than clobbering it.
 - **Already a git repo?** Run `git rev-parse --is-inside-work-tree`. If it fails
   (you're **not** inside a git working tree), **stop with an error**: tell the
   user to run `git init` first — `/init` does not initialise the repo for you.
