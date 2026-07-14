@@ -1,20 +1,22 @@
 ---
-description: Bootstrap a rhiza-managed repo in the current folder (empty, or an existing git repo that isn't yet rhiza-managed) — git init if needed, ask whether it lives on GitHub or GitLab (auto-detecting an existing remote), ask owner/name/visibility, pick language (python/go) and template repo (default jebel-quant/rhiza or rhiza-go, with a reachability check), optionally scaffold the project (pyproject/src/tests, mkdocs.yml, a real starter README) via the bundled init_scaffold.py, validate the config and run the template test suite (enhancing a pre-existing pyproject.toml if it fails a structural check), then put the scaffold and the first template sync on a `rhiza_init_<date>` branch and open a PR. Never pushes rhiza changes straight to the default branch.
+description: Bootstrap a rhiza-managed repo in the current folder — assumes you're already inside a git repo (errors out if not) that isn't yet rhiza-managed (no `.rhiza/` yet), asks whether it lives on GitHub or GitLab (auto-detecting an existing remote), ask owner/name/visibility, pick language (python/go) and template repo (default jebel-quant/rhiza or rhiza-go, with a reachability check), optionally scaffold the project (pyproject/src/tests, mkdocs.yml, a real starter README) via the bundled init_scaffold.py, validate the config and run the template test suite (enhancing a pre-existing pyproject.toml if it fails a structural check), then put the scaffold and the first template sync on a `rhiza_init_<date>` branch and open a PR. Never pushes rhiza changes straight to the default branch.
 argument-hint: "[repo name]  (optional; defaults to the current folder name)"
 allowed-tools: Bash(git*), Bash(gh*), Bash(glab*), Bash(uvx*), Bash(make*), Bash(python3*), Bash(cat*), Bash(ls*), Bash(basename*), Bash(pwd*), Bash(date*), Read, Write, Edit, AskUserQuestion
 ---
 
 You are running `/init` in the **current working directory**. Goal: turn this
-folder into a fresh **rhiza-managed** repository — initialise git (if it isn't
-already), decide where it lives (GitHub or GitLab), scaffold the `.rhiza/` config
-for that platform, apply the rhiza template with a first sync, and **open a PR**
-with that work. After it merges, the repo is a normal rhiza-managed repo where
-`/update`, `/quality`, and `make sync` all work.
+folder into a fresh **rhiza-managed** repository — decide where it lives (GitHub
+or GitLab), scaffold the `.rhiza/` config for that platform, apply the rhiza
+template with a first sync, and **open a PR** with that work. After it merges,
+the repo is a normal rhiza-managed repo where `/update`, `/quality`, and
+`make sync` all work.
 
-The folder may be **empty** or may **already contain a git repo** (a `.git/` you
-`git init`'d earlier, possibly with commits and even an `origin` remote) — as
-long as it isn't rhiza-managed yet. Detect which case you're in and adapt: never
-re-init an existing repo, and never clobber an existing remote.
+**`/init` does not create the git repo — you must already be inside one.** If the
+current directory isn't a git working tree, stop with an error telling the user
+to run `git init` first (see step 1). The repo may be fresh (a `.git/` with no
+commits) or established (commits, and even an `origin` remote) — as long as it
+isn't rhiza-managed yet. Adapt to which it is: never re-init or reset the repo,
+and never clobber an existing remote.
 
 **Never push rhiza changes to the default branch.** The `.rhiza` scaffold and the
 template sync (which can be hundreds of files, including CI) go on a dedicated
@@ -35,11 +37,16 @@ a brand-new repo, and every sync afterward uses the template's own target.
 Work through these steps. Stop and report if a precondition fails.
 
 ## 1. Preconditions — and detect the starting state
-- **Already rhiza-managed?** If `.rhiza/template.yml` exists, abort and point at
-  `/update` — this command is for repos that aren't managed yet.
-- **Is there already a git repo?** Run `git rev-parse --is-inside-work-tree`
-  (ignore its error if absent). Record `HAS_GIT` accordingly. If yes, capture the
-  existing state — you'll reuse it, not recreate it:
+Run these checks first, in order, and **stop** on the first that fails:
+- **Not already rhiza-managed?** Check for a `.rhiza/` directory (`test -d .rhiza`).
+  If it exists at all, abort and point at `/update` — `/init` is only for repos
+  that aren't managed yet, and it must never write over an existing `.rhiza/`
+  config. A stray `.rhiza/` even without a `template.yml` is still a stop: report
+  it rather than clobbering it.
+- **Already a git repo?** Run `git rev-parse --is-inside-work-tree`. If it fails
+  (you're **not** inside a git working tree), **stop with an error**: tell the
+  user to run `git init` first — `/init` does not initialise the repo for you.
+  If it succeeds, capture the existing state you'll reuse (not recreate):
   - current branch — `git branch --show-current` (may be empty on an
     unborn branch with no commits);
   - whether any commits exist — `git rev-list -n1 --all` (empty output ⇒ no
@@ -51,16 +58,15 @@ Work through these steps. Stop and report if a precondition fails.
   whether to proceed — `/init` layers `.rhiza/` config plus a large template sync
   on top of whatever is here. Do not proceed without a yes.
 - Confirm `uvx` is available (`uvx --version`). It's required for the bootstrap
-  sync in step 9. If missing, you can still scaffold, branch, and (for a
-  brand-new repo) create the remote — but warn that the user must install `uv`
+  sync in step 9. If missing, you can still scaffold, branch, and (for a repo with
+  no remote yet) create the remote — but warn that the user must install `uv`
   and run the first sync manually before the PR is meaningful.
 
-## 2. git init (only if needed)
-- If `HAS_GIT` is false, `git init -b main` (default branch `main`). If the
-  installed git is too old for `-b`, run `git init` then
-  `git symbolic-ref HEAD refs/heads/main`.
-- If `HAS_GIT` is true, **skip init entirely** — the repo already exists. Keep its
-  current branch; do not rename or reset it.
+## 2. No git init — the repo already exists
+`/init` never runs `git init`. Step 1 has already guaranteed you're inside an
+existing git repository (it stops with an error otherwise), so there is nothing
+to create here. Keep the repo's current branch as-is; do not rename, reset, or
+re-init it.
 
 > **Shortcut for a fully-fledged repo.** If `EXISTING_ORIGIN` was found in
 > step 1, the repo already exists remotely — its platform, owner, and name are

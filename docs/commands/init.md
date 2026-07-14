@@ -1,7 +1,8 @@
 # `/rhiza:init`
 
-Bootstrap a **rhiza-managed repo** in the current folder — empty, or an existing
-git repo that isn't managed yet.
+Bootstrap a **rhiza-managed repo** inside an existing git repo that isn't managed
+yet. Run it from within a git working tree — it does **not** create the repo for
+you.
 
 ```
 /rhiza:init [repo name]
@@ -12,13 +13,15 @@ name.
 
 ## What it does
 
-1. **Detects the starting state** — aborts if the repo is already rhiza-managed
-   (use [`/rhiza:update`](update.md) instead); otherwise handles both an empty
-   folder and an existing `.git` (with commits and/or an `origin` remote).
-2. **`git init`** only when there's no repo yet — never re-inits or renames an
-   existing branch.
+1. **Checks preconditions** — aborts if a `.rhiza/` directory already exists (the
+   repo is already managed → use [`/rhiza:update`](update.md) instead), and
+   **errors out if the current directory isn't a git repo** (run `git init`
+   first). Otherwise it adapts to the existing state — a fresh `.git` with no
+   commits, or an established repo with commits and/or an `origin` remote.
+2. **Never runs `git init`** — the repo must already exist; it keeps the current
+   branch and never re-inits or renames it.
 3. **Asks GitHub vs GitLab** (auto-detecting the host from an existing `origin`),
-   then owner / name / visibility for a brand-new repo.
+   then owner / name / visibility for a repo with no remote yet.
 4. **Picks language and template repo** — Python or Go, defaulting to
    `jebel-quant/rhiza` or `jebel-quant/rhiza-go`, with a reachability check
    before writing anything.
