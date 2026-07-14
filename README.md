@@ -27,6 +27,35 @@ The commands then appear namespaced under the plugin: `/rhiza:install`,
 `/rhiza:update`, `/rhiza:quality`, `/rhiza:revisit`, `/rhiza:stats`,
 `/rhiza:repos`. Type `/rhiza` to have Claude Code autocomplete them.
 
+### Install a specific version
+
+By default the marketplace tracks this repo's default branch, so `/plugin
+install` pulls the latest release. To pin to a specific published version,
+append that version's git tag as a `#<ref>` suffix when you add the marketplace
+(see the [releases page](https://github.com/Jebel-Quant/rhiza-claude/releases)
+for available tags):
+
+```
+/plugin marketplace add Jebel-Quant/rhiza-claude#v0.4.1
+/plugin install rhiza@rhiza-claude
+```
+
+The same `#<ref>` suffix works from a shell:
+
+```bash
+claude plugin marketplace add Jebel-Quant/rhiza-claude#v0.4.1
+claude plugin install rhiza@rhiza-claude
+```
+
+Pinning happens at the marketplace layer, not per plugin — once the marketplace
+is added, `/plugin install` uses whatever ref it points at. To switch versions,
+remove the marketplace and re-add it at the desired tag:
+
+```
+/plugin marketplace remove rhiza-claude
+/plugin marketplace add Jebel-Quant/rhiza-claude#v0.4.0
+```
+
 ## Commands
 
 - **`/rhiza:install`** — bootstrap a rhiza-managed repo in the current folder
@@ -54,6 +83,22 @@ The commands then appear namespaced under the plugin: `/rhiza:install`,
   (default `rhiza`) as a JSON document — name, description, URL, topics,
   language, stars, and timestamps. Set `GITHUB_TOKEN` to raise the API rate
   limit.
+
+### Repo utilities
+
+Thin, **stdlib-only** commands backed by bundled scripts — they read
+`.rhiza/template.lock` / `.rhiza/template.yml` directly and work without the
+`rhiza` CLI installed.
+
+- **`/rhiza:status`** — show the current sync status (template repository, ref,
+  synced SHA, timestamp, strategy). Add `--files` (alias `--tree`) to list the
+  managed files as a directory tree, or `--check` to compare the pinned ref
+  against the latest upstream release and see whether you're behind. Read-only.
+- **`/rhiza:validate`** — validate `.rhiza/template.yml`: that it parses and its
+  required/optional fields are present and well-typed. Exits non-zero on failure.
+- **`/rhiza:uninstall`** — remove every rhiza-managed file listed in
+  `.rhiza/template.lock`, prune the emptied directories, and delete the lock.
+  **Destructive**; prompts for confirmation unless `--force` is passed.
 
 ## Layout
 
