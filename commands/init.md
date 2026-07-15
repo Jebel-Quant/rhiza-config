@@ -35,11 +35,12 @@ commit that seeds a brand-new repo (step 6), because a PR needs a base branch.
 Argument (optional): `$ARGUMENTS` — the repository name. If empty, default to the
 current folder's basename.
 
-**How the first sync bootstraps.** `.rhiza/rhiza.mk` (the real `make` API) is
-delivered *by* the template sync. The scaffolder in step 8 writes a small
-**bootstrap `Makefile`** whose `sync` target runs `uvx rhiza sync .` and is active
-only until that first sync writes `.rhiza/rhiza.mk` — so `make sync` works even on
-a brand-new repo, and every sync afterward uses the template's own target.
+**How the first sync works.** `.rhiza/rhiza.mk` (the real `make` API) is delivered
+*by* the template sync (step 9), which `/init` runs with the bundled
+`scripts/sync.py` — **not** the `rhiza` CLI. The scaffolder in step 8 writes a
+small repo-owned `Makefile` that just `-include`s `.rhiza/rhiza.mk` once it
+exists; before the first sync, its `sync` target only prints a hint (it does not
+shell out to `uvx rhiza`, which is being retired).
 
 Work through these steps. Stop and report if a precondition fails.
 
@@ -223,9 +224,10 @@ Relay its `created`/`skipped`/`notes` output (for `go` it prints the
 
 ## 9. Bootstrap the first sync (on the branch)
 Run the first sync with the plugin's **bundled, stdlib-only** porter — the same
-`scripts/sync.py` that `/update` uses. Do **not** use `uvx rhiza sync` (or the
-bootstrap `Makefile`'s `make sync`, which shells out to it): the `rhiza` CLI is
-being retired, and the bundled script is its stdlib replacement.
+`scripts/sync.py` that `/update` uses. Do **not** use `uvx rhiza sync`: the
+`rhiza` CLI is being retired, and the bundled script is its stdlib replacement.
+(The repo-owned `Makefile` can't sync yet either — its `sync` target only prints
+a hint until this first sync delivers `.rhiza/rhiza.mk`.)
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/sync.py" .
 ```
