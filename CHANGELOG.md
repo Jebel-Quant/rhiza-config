@@ -5,6 +5,33 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com),
 and entries are generated from [Conventional Commits](https://www.conventionalcommits.org).
 
+## [0.4.2] - 2026-07-19
+
+### New Features
+- *(install)* Run make test and enhance a pre-existing pyproject.toml (#34)
+- *(new)* Add /rhiza:new to scaffold a module + mirrored test (#39)
+- *(status)* Add --check (is the template behind the latest release?) (#37)
+- *(release)* Add /rhiza:release to prepare an app release locally (#40)
+- *(init)* Wrap uv init; delegate to /update when already managed (#43)
+- *(init)* Wrap uv init; delegate to /update when already managed (#46)
+- Fold make-help README sync into /revisit (#48)
+- /revisit make-help README sync; harden /release version + pin bumps (#49)
+- *(check_test_layout)* Exempt tests/benchmarks and tests/stress from parity (#50)
+- *(check_test_layout)* Add documented opt-out for behaviour-organised suites (#51)
+
+### Documentation
+- Explain how to install a pinned plugin version (#33)
+- *(readme)* Document the status/validate/uninstall repo-utility commands (#38)
+
+### Maintenance
+- Remove the /sync command (subsumed by /update) (#32)
+- *(status)* Fold /tree into `status --files`, retire /tree (#36)
+- Smoke-test that the rhiza plugin installs and its commands register (#35)
+- *(commands)* Rename install→init (reverses #28) (#41)
+- *(init_scaffold)* Retire package/readme templates; drop the last uvx rhiza dependency (#44)
+- Drop Makefile targets redundant with `make lint` (#45)
+- Run bundled scripts under uv-pinned python 3.12
+
 ## [0.4.1] - 2026-07-13
 
 ### Maintenance
